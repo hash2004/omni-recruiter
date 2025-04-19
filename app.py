@@ -2,6 +2,8 @@ from fastapi import FastAPI
 from fastapi_mcp import FastApiMCP
 from src.linkedin.linkedin import get_linkedin_profile_data
 from src.google_drive.gdrive import get_resume_info_from_gdrive
+from src.email.email import send_email
+
 
 app = FastAPI()
 
@@ -26,6 +28,30 @@ async def resume_info(folder_url: str, output_dir: str = "output"):
         api_key="edytn5mDI26B5eaqqM83ildOZDvVvTEG"
     )
     return resume_data
+
+@app.post("/email/send", operation_id="send_email_to_recipient")
+async def send_email_endpoint(
+    to_email: str, 
+    body: str, 
+    subject: str 
+):
+    """
+    Send an email to the specified recipient
+    
+    Args:
+        to_email: Recipient's email address
+        body: The content of the email
+        subject: Subject line for the email (optional)
+    """
+    try:
+        send_email(
+            to_email=to_email,
+            body=body,
+            subject=subject
+        )
+        return {"status": "success", "message": f"Email sent to {to_email}"}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
 
 mcp = FastApiMCP(
     app,  
