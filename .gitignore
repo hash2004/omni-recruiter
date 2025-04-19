@@ -1,2 +1,4 @@
-# dont let any pycache files in 
-__pycache__/
+# Ignore all pycache files anywhere in the repository
+**/__pycache__/
+*.py[cod]
+*$py.class
