@@ -1,0 +1,1 @@
+RAPID_API_KEY = "6d1442a489mshccb38dca71d2ca5p12253ajsndc8acfc924bb"
