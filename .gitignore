@@ -1,0 +1,2 @@
+# dont let any pycache files in 
+__pycache__/

@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi_mcp import FastApiMCP
 from src.linkedin.linkedin import get_linkedin_profile_data
-
+from src.google_drive.gdrive import get_resume_info_from_gdrive
 
 app = FastAPI()
 
@@ -15,10 +15,17 @@ async def linkedin_profile(username: str):
     return profile_data
 
 
-#return hello at /hello
-@app.get("/hello", operation_id="hello")
-async def hello():
-    return {"message": "Shrhary!"}
+@app.get("/resume/gdrive", operation_id="get_resume_info")
+async def resume_info(folder_url: str, output_dir: str = "output"):
+    """
+    Get resume information from a Google Drive folder
+    """
+    resume_data = get_resume_info_from_gdrive(
+        folder_url=folder_url,
+        output_dir=output_dir,
+        api_key="edytn5mDI26B5eaqqM83ildOZDvVvTEG"
+    )
+    return resume_data
 
 mcp = FastApiMCP(
     app,  
