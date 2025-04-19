@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi_mcp import FastApiMCP
-from src.linkedin.linkedin import get_linkedin_profile_data
+from src.linkedin.linkedin import get_linkedin_profile_data, get_profile_posts, get_profile_reactions
 from src.google_drive.gdrive import get_resume_info_from_gdrive
 from src.email.email import send_email
 from fastapi import FastAPI, HTTPException, BackgroundTasks
@@ -18,15 +18,6 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI()
 
-@app.get("/linkedin/{username}", operation_id="get_linkedin_profile")
-async def linkedin_profile(username: str):
-    """
-    Get LinkedIn profile data for a specific username
-    """
-    profile_data = get_linkedin_profile_data(username)
-    return profile_data
-
-
 @app.get("/resume/gdrive", operation_id="get_resume_info")
 async def resume_info(folder_url: str, output_dir: str = "output"):
     """
@@ -38,6 +29,30 @@ async def resume_info(folder_url: str, output_dir: str = "output"):
         api_key="edytn5mDI26B5eaqqM83ildOZDvVvTEG"
     )
     return resume_data
+
+@app.get("/linkedin/{username}", operation_id="get_linkedin_profile")
+async def linkedin_profile(username: str):
+    """
+    Get LinkedIn profile data for a specific username
+    """
+    profile_data = get_linkedin_profile_data(username)
+    return profile_data
+
+@app.get("/linkedin/{username}/posts", operation_id="get_profile_posts")
+async def linkedin_profile_posts(username: str):
+    """
+    Get LinkedIn profile posts for a specific username.
+    """
+    posts_data = get_profile_posts(username)
+    return posts_data
+
+@app.get("/linkedin/{username}/reactions", operation_id="get_profile_reactions")
+async def linkedin_profile_reactions(username: str, start: int = 0):
+    """
+    Get LinkedIn profile reactions for a specific username, starting from a given offset.
+    """
+    reactions_data = get_profile_reactions(username, start)
+    return reactions_data
 
 @app.post("/email/send", operation_id="send_email_to_recipient")
 async def send_email_endpoint(
@@ -90,20 +105,19 @@ async def complete_interview(request: CallRequest):
     
     logger.info(f"Initiating call to {request.customer_number}")
     
+    # In your complete_interview function, modify the data dictionary:
     data = {
         'assistant': {
             "firstMessage": "Hello, this is Omni Recruiter AI, a recruitment assistant. This is a pre-screening interview call. Are you ready to begin?",
-        },
-        "model": {
-                "provider": "openai",
-                "model": "gpt-4o",
-                "messages": [
-                    {
-                        "role": "system",
-                        "content": f"{system_prompt}"
-                    }
-                ]
-            },  
+            "provider": "openai",  # Move these properties inside assistant
+            "model": "gpt-4o",
+            "messages": [
+                {
+                    "role": "system",
+                    "content": f"{system_prompt}"
+                }
+            ]
+        },  
         'phoneNumberId': PHONE_NUMBER_ID,
         'customer': {
             'number': request.customer_number,

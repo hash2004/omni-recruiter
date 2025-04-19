@@ -5,5 +5,5 @@
 
  uvicorn app:app --reload
 
- # Taviliy MCP
-  npx -y supergateway --stdio "npx -y tavily-mcp@0.1.4" --port 8002 --baseUrl http://localhost:8001 --ssePath /sse --messagePath /message --cors
+ # Brave MCP
+npx -y supergateway --stdio "npx -y @modelcontextprotocol/server-brave-search" --port 8002 --baseUrl http://localhost:8001 --ssePath /sse --messagePath /message --cors
