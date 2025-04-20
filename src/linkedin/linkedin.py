@@ -9,7 +9,7 @@ import httpx
 conn = http.client.HTTPSConnection("linkedin-data-api.p.rapidapi.com")
 
 headers = {
-    'x-rapidapi-key': "6d1442a489mshccb38dca71d2ca5p12253ajsndc8acfc924bb",
+    'x-rapidapi-key': "bfbd3943cdmshfcd1edd8b659221p1d584fjsn7fea507d10aa",
     'x-rapidapi-host': "linkedin-data-api.p.rapidapi.com"
 }
 
@@ -102,8 +102,6 @@ def fetch_linkedin_profile_likes(username: str, start: int = 0) -> str:
 
     return combined_text_output
 
-
-print(fetch_linkedin_profile_likes("aaqib-nazir"))
 
 
 

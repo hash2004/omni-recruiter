@@ -1,6 +1,0 @@
-{"level":"info","message":"🚀 MCP server started on port 3000 in production mode","service":"google-calendar-mcp","timestamp":"2025-04-20 05:09:18"}
-{"level":"info","message":"Server ID: google-calendar-mcp","service":"google-calendar-mcp","timestamp":"2025-04-20 05:09:18"}
-{"level":"info","message":"Server Name: Google Calendar Integration","service":"google-calendar-mcp","timestamp":"2025-04-20 05:09:18"}
-{"level":"info","message":"Using Google Cloud OAuth authentication method","service":"google-calendar-mcp","timestamp":"2025-04-20 05:09:18"}
-{"level":"info","message":"Using authentication method: google_cloud","service":"google-calendar-mcp","timestamp":"2025-04-20 05:09:18"}
-{"level":"info","message":"No authentication found. User needs to authenticate.","service":"google-calendar-mcp","timestamp":"2025-04-20 05:09:18"}
