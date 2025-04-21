@@ -1,60 +1,257 @@
-# Omni Recruiter - Your Super Powered AI Recruitment Assistant
-Omni Recruiter is an End2End recruitment assistant that can parse resumes on Google Drive, do a LinkedIn Analaysis on each candidate, including posts, likes, and profile. 
+# Overview
 
-It can also then perform autonmous AI phone calls to the candidate for a pre-screening interview questions. After that, it can also perform a summary analysis on the call that just happened. 
+Omni Recruiter is an end‑to‑end AI recruitment assistant driven by custom and open‑source MCPs. It automates the full pre‑screening pipeline:
 
-Then, Omni recruiter can create a GitHub repo automously and send an email to the candidate for the next round of the interview (project based interview)
+1. Resume parsing from Google Drive
+2. LinkedIn profile, posts & reactions analysis
+3. Autonomous AI phone calls for pre‑screening interviews
+4. Call transcript summarization
+5. Automated GitHub repo creation & email invitations
+6. Web browsing via Brave MCP
 
-It also has access to the web using the Brave MCP.
+All MCPs communicate with a central “Illegal Agent” LLM (e.g. GPT‑4O) to orchestrate each step.
 
-All in all, it contains 7 Custom MCPs and 2 open source MCPs.
+## Custom MCPs
 
-# Custom MCPs
-I have designed 7 Custom MCPs that the model can use to streamline recruitment tasks. 
+1. get_resume_info
+    
+    What it does:
+    
+    – Takes a Google Drive folder link, downloads all PDF resumes
+    
+    – Runs each PDF through Mistral OCR to extract text
+    
+    – Forwards cleaned Markdown‑formatted text to the Illegal Agent
+    
+    How it’s done:
+    
+    – Google Drive API → download files
+    
+    – Mistral OCR client call (client.ocr.process(...))
+    
+    – Format result as Markdown
+    
+    Invocation example:
+    
+    `{`
+    
+    `"mcp": "get_resume_info",`
+    
+    `"args": { "drive_link": "https://..." }`
+    
+    `}`
+    
+2. get_linkedin_profile
+    
+    What it does:
+    
+    – Fetches a user’s LinkedIn profile via RapidAPI
+    
+    – Summarizes experience, skills, headline with GPT‑4O
+    
+    How it’s done:
+    
+    – RapidAPI “linkedin-data-api” → /get-profile endpoint
+    
+    – Summarization chain in GPT‑4O
+    
+    Invocation example:
+    
+    `{`
+    
+    `"mcp": "get_linkedin_profile",`
+    
+    `"args": { "username": "john‑doe" }`
+    
+    `}`
+    
+3. get_profile_posts
+    
+    What it does:
+    
+    – Retrieves latest LinkedIn posts via RapidAPI
+    
+    – Summarizes content & engagement metrics
+    
+    How it’s done:
+    
+    – RapidAPI → /get-profile-posts?start=0
+    
+    – Truncate to 5 posts to respect token limits
+    
+    Invocation example:
+    
+    `{`
+    
+    `"mcp": "get_profile_posts",`
+    
+    `"args": { "username": "john‑doe" }`
+    
+    `}`
+    
+4. get_profile_reactions
+    
+    What it does:
+    
+    – Gets text of last 5 posts the user reacted to
+    
+    – Trims metadata, delivers to Illegal Agent
+    
+    How it’s done:
+    
+    – RapidAPI → /get-profile-likes
+    
+    – Slice to 5 items, strip extra fields
+    
+    Invocation example:
+    
+    `{`
+    
+    `"mcp": "get_profile_reactions",`
+    
+    `"args": { "username": "john‑doe" }`
+    
+    `}`
+    
+5. perform_pre_screening_interview
+    
+    What it does:
+    
+    – Places an AI‑driven call via Vapi.ai + Twilio
+    
+    – Asks a configurable question set
+    
+    – Returns a call_id for later summarization
+    
+    How it’s done:
+    
+    – Twilio Voice API + Vapi.ai TTS/ASR integration
+    
+    Invocation example:
+    
+    `{`
+    
+    `"mcp": "perform_pre_screening_interview",`
+    
+    `"args": { "phone": "+15551234567" }`
+    
+    `}`
+    
+6. get_call_summary
+    
+    What it does:
+    
+    – Fetches the transcript by call_id
+    
+    – Summarizes candidate responses with GPT‑4O
+    
+    How it’s done:
+    
+    – Twilio transcript API → raw text
+    
+    – Prompt GPT‑4O for concise summary
+    
+    Invocation example:
+    
+    `{`
+    
+    `"mcp": "get_call_summary",`
+    
+    `"args": { "call_id": "abc123" }`
+    
+    `}`
+    
+7. send_email_to_recipient
+    
+    What it does:
+    
+    – Sends an email via SMTP or SendGrid using an app password or API key
+    
+    How it’s done:
+    
+    – FastAPI endpoint → SMTP client call
+    
+    Invocation example:
+    
+    `{`
+    
+    `"mcp": "send_email_to_recipient",`
+    
+    `"args": {`
+    
+    `"to": "candidate@example.com",`
+    
+    `"subject": "Next Interview Round",`
+    
+    `"body": "Hi there, please find details..."`
+    
+    `}`
+    
+    `}`
+    
 
-## get_resume_info 
-This MCP takes a google drive link as input, downloads all resumes inside the google drive link. 
-Then the pdf files are read by the state of the art document reader, currently the best in the market:
-Mistrial OCR. 
-
-The markdown formatted text (Perfect for LLMs) are then passed to the Illegal Agent. 
-
-## get_linkedin_profile 
-This MCP takes user's linkedin username as input and reads his/her profile using the Rapid API. After that, the data is fed into an LLM (gpt-4o) which summarizes the information and then passes it back to the Illegal Agent.
-
-## get_profile_posts
-This MCP takes user's linkedin username as input and reads his/her latest posts on LinkedIn using the Rapid API. After that, the data is fed into an LLM (gpt-4o) which summarizes the information and then passes it back to the Illegal Agent.
-
-## get_profile_reactions
-This MCP takes user's linkedin username as input and reads the likes the user has done on LinkedIn. After that the data is trimmed to only contain text from the latest 5 posts reacted to, otherwise the model was running our of tokens (Avg response from Rapid API was 156k tokens). When the information is trimmed, its passed back to the Illegal Agent. 
-
-## send_email_to_recipient
-Thsi MCP takes the user's email, subject line and body of the email and sends it directly via chatting with the Illegal Agent. 
-
-## perform_pre_screening_interview
-This MCP takes the user's phone number and does an Automous AI Cellphone call on the user. The AI calls the candidate and asks him/her a series of pre-screening interview questions. It returns a call id on the Illegal Agents chat, that can be used later for analysis purposes. 
-
-This is done through Vapi.ai and Twillio
-
-## get_call_summary
-This MCP takes the call id generated by the MCP earlier and performs a summary analysis on the call transcript and gives that back to the illegal Agent. 
-
-## How to run Custom MCPs?
-uvicorn app:app --reload
-
- npx -y supergateway --stdio "mcp-proxy http://0.0.0.0:8000/mcp" --port 8001 --baseUrl http://localhost:8000 --ssePath /sse --messagePath /message --cors
-
-# Open Source MCPs 
-I have implemented 2 Open Source MCPs that give the Illegal Agent to browse the web, and use GitHub Autonmously. 
+# Open Source MCPs
 
 ## Brave MCP
-This MCP allows the Illegal Agent to access the web via the Brave Browser, and returns links and sources to information that LLMs dont have due to cutoff dates. 
 
-Run it by: 
-npx -y supergateway --stdio "npx -y @modelcontextprotocol/server-brave-search" --port 8002 --baseUrl http://localhost:8001 --ssePath /sse --messagePath /message --cors
+Purpose: Allows the Illegal Agent to browse the web and return links, snippets, and sources for up‑to‑date information.
+
+Run command:
+
+`npx -y supergateway`
+
+`--stdio "npx -y @modelcontextprotocol/server-brave-search"`
+
+`--port 8002`
+
+`--baseUrl [http://localhost:8001](http://localhost:8001/)`
+
+`--ssePath /sse`
+
+`--messagePath /message`
+
+`--cors`
 
 ## GitHub MCP
-This allows the Illegal Agent to peform autonmous tasks on GitHub via chat, for example creating a repository, committing to a repo, etc. 
 
-Run it by:
- GITHUB_PERSONAL_ACCESS_TOKEN="PAT" npx -y supergateway --stdio "npx -y @modelcontextprotocol/server-github" --port 8003 --baseUrl http://localhost:8003 --ssePath /sse --messagePath /message --cors
+Purpose: Enables the Illegal Agent to autonomously create repos, commit changes, open PRs, etc.
+
+Run command:
+
+`GITHUB_PERSONAL_ACCESS_TOKEN="YOUR_TOKEN"`
+
+`npx -y supergateway`
+
+`--stdio "npx -y @modelcontextprotocol/server-github"`
+
+`--port 8003`
+
+`--baseUrl [http://localhost:8003](http://localhost:8003/)`
+
+`--ssePath /sse`
+
+`--messagePath /message`
+
+`--cors`
+
+## RUNNING YOUR CUSTOM MCPS
+
+1. Start the FastAPI MCP server:
+    
+    uvicorn app:app --reload
+    
+2. Proxy MCPs for LLM integration:
+    
+    `npx -y supergateway`
+    
+    `--stdio "mcp-proxy http://0.0.0.0:8000/mcp"`
+    
+    `--port 8001`
+    
+    `--baseUrl [http://localhost:8000](http://localhost:8000/)`
+    
+    `--ssePath /sse`
+    
+    `--messagePath /message`
+    
+    `--cors`
