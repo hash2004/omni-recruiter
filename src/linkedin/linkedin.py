@@ -9,7 +9,7 @@ import httpx
 conn = http.client.HTTPSConnection("linkedin-data-api.p.rapidapi.com")
 
 headers = {
-    'x-rapidapi-key': "bfbd3943cdmshfcd1edd8b659221p1d584fjsn7fea507d10aa",
+    'x-rapidapi-key': "X",
     'x-rapidapi-host': "linkedin-data-api.p.rapidapi.com"
 }
 

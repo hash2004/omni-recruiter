@@ -14,8 +14,8 @@ def send_email(to_email: str, body: str, subject: str = ""):
     # Load configuration from environment (or replace with string literals)
     smtp_server = "smtp.gmail.com"
     smtp_port = 587
-    sender_email = "nadeemhashim7@gmail.com"      # e.g. yourname@gmail.com
-    app_password = "wzqu uttr svgy adwp" # your Gmail app password
+    sender_email = "nadeemhashim7@gmail.com"     
+    app_password = "X" 
 
     # Build the email
     msg = EmailMessage()
